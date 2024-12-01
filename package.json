@@ -1,0 +1,19 @@
+{
+  "name": "aoc2024",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "bun bun ./viewer/main.js --outdir ./viewer/build --watch",
+    "day": "bun index.ts",
+    "serve": "bun ./viewer/server.js",
+    "debug": "bun --inspect-wait=ws://localhost:6499/debug index.ts"
+  },
+  "dependencies": {
+  }
+}
