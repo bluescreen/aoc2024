@@ -1,7 +1,5 @@
-import { readInputForDay, readInputForDayExample } from "../util";
-
-const zip = (a:number[], b: number[]) => a.map((k, i) => [k, b[i]]);
-
+import {  readInputForDayExample } from "../util";
+import { zip } from "./util/zip";
 
 export const part1 = (input: string[]) => {
   const { left, right } = parse(input);
@@ -24,16 +22,13 @@ export const part2 = (input: string[]) => {
     .reduce((acc, a) => acc+a);
 };
 
-
-
 export const main = async () => {
   const data = await readInputForDayExample(1);
   console.log("Result part 1", part1(data));
   console.log("Result part 2", part2(data));
 };
 
-
-function parse(input: string[]):  { left: number[]; right: number[]; } {
+const parse =(input: string[]):  { left: number[]; right: number[]; } => {
   const left: number[] = [];
   const right: number[] = [];
 
