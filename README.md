@@ -10,6 +10,13 @@ To install dependencies:
 bun install
 ```
 
+Create template for day
+
+```bash
+./day $DAY
+```
+
+
 To run:
 
 ```bash
