@@ -1,5 +1,5 @@
 import { expect, describe, test as it } from "bun:test";
-import { part1, part2 } from "./p_template";
+import { part1, part2 } from "./p${DAY}";
 import { readInputForDay, readInputForDayExample } from "../util";
 
 const DAY = Number("${DAY}")

@@ -24,7 +24,7 @@ copy_file() {
 }
 
 copy_file "template/p_template.ts" "$dest_file_ts"
-copy_file "template/p_template.test.ts" "$dest_file_test"
+copy_file "template/p_template.t.ts" "$dest_file_test"
 touch "$dest_input_example"
 touch "$dest_input_day"
 echo "Created day $day"
