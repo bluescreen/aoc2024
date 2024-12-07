@@ -17,37 +17,43 @@ function parseInput(input: string[]): Equation[] {
     });
 }
 
-function generateOperatorCombinations(length: number, operators: string[]): string[][] {
-  const results: string[][] = [];
-  const generate = (current: string[]) => {
-    if (current.length === length) {
-      results.push([...current]);
-      return;
-    }
-    operators.forEach(op => generate([...current, op]));
-  };
-  generate([]);
-  return results;
-}
-
-function evaluateExpression(numbers: number[], operators: string[]): number {
-  return operators.reduce((result, op, i) => {
-    const next = numbers[i + 1];
-    return op === "+" ? result + next
-         : op === "*" ? result * next
-         : parseInt(result.toString() + next.toString(), 10);
-  }, numbers[0]);
-}
 
 function solveEquations(equations: Equation[], operators: string[]): number[] {
-  return equations
-    .map(({ target, numbers }) => {
-      const operatorCombinations = generateOperatorCombinations(numbers.length - 1, operators);
-      return operatorCombinations.some(combination => evaluateExpression(numbers, combination) === target)
-        ? target
-        : null;
-    })
-    .filter(Boolean) as number[]; 
+  const solutions: number[] = [];
+
+  const evaluate = (numbers: number[], target: number, current: number, index: number, operators: string[]): boolean => {
+    if (index === numbers.length - 1) {
+      return current === target;
+    }
+
+    for (const op of operators) {
+      const nextValue = numbers[index + 1];
+      let newResult = current;
+      
+      if (op === "+") {
+        newResult += nextValue;
+      } else if (op === "*") {
+        newResult *= nextValue;
+      } else if (op === "||") {
+        newResult = parseInt(current.toString() + nextValue.toString(), 10);
+      }
+
+      if (newResult > target) continue;
+
+      if (evaluate(numbers, target, newResult, index + 1, operators)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  for (const { target, numbers } of equations) {
+    if (evaluate(numbers, target, numbers[0], 0, operators)) {
+      solutions.push(target);
+    }
+  }
+
+  return solutions;
 }
 
 
@@ -68,5 +74,3 @@ export const main = async () => {
   console.log("Result part 1", part1(data));
   console.log("Result part 2", part2(data));
 };
-
-
