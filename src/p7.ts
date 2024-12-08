@@ -1,4 +1,4 @@
-import { readInputForDay, readInputForDayExample } from "../util";
+import {  readInputForDayExample } from "../util";
 
 type Equation = {
   target: number;
@@ -35,10 +35,12 @@ function solveEquations(equations: Equation[], operators: string[]): number[] {
       } else if (op === "*") {
         newResult *= nextValue;
       } else if (op === "||") {
-        newResult = parseInt(current.toString() + nextValue.toString(), 10);
+        newResult = concatNumbers(current, nextValue);
       }
 
-      if (newResult > target) continue;
+      if (newResult > target) {
+        continue
+      };
 
       if (evaluate(numbers, target, newResult, index + 1, operators)) {
         return true;
@@ -56,6 +58,10 @@ function solveEquations(equations: Equation[], operators: string[]): number[] {
   return solutions;
 }
 
+function concatNumbers(num1: number, num2: number) {
+  return num1 * Math.pow(10, (Math.floor(Math.log10(num2)) + 1)) + num2;
+}
+
 
 export const part1 = (input: string[]) => {
   const equations = parseInput(input);
@@ -70,7 +76,7 @@ export const part2 = (input: string[]) => {
 const DAY = Number("7")
 
 export const main = async () => {
-  const data = await readInputForDay(DAY);
+  const data = await readInputForDayExample(DAY);
   console.log("Result part 1", part1(data));
   console.log("Result part 2", part2(data));
 };
