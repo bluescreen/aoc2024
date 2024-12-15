@@ -69,3 +69,32 @@ export function printGrid(
   out += "└─" + "──┴─".repeat(width - 1) + "──┘\n";
   console.log(out);
 }
+
+export function printGridCompact(
+  grid: (string | number)[][],
+  title?: string,
+  marked?: Set<string>,
+  callback?: (r: number, c: number) => string
+) {
+  let out = "";
+  let height = 1;
+  let width = grid[0].length;
+
+  if (title) out += title + "\n";
+
+  out += "\n";
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      const value =
+        marked?.has(`${y},${x}`) && callback
+          ? bold(callback(y, x))
+          : grid[y][x];
+        out += value
+    }
+    out += " " + height + "\n";
+    height++;
+    if (y < grid.length - 1) {
+    }
+  }
+  console.log(out);
+}
