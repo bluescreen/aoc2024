@@ -1,101 +1,111 @@
-import { printGrid, readInputForDay, readInputForDayExample } from "../util";
+import {  printGrid, readInputForDay, readInputForDayExample } from "../util";
 
-type GardenMap = string[][];
+type Point = { x: number; y: number };
 
-const directions = [
-  [-1, 0], // up
-  [1, 0],  // down
-  [0, -1], // left
-  [0, 1]   // right
-];
+type RegionInfo = {
+  area: number;
+  sides: number;
+};
 
-function calculateTotalFencingCost(map: GardenMap, mode: number): number {
-  const rows = map.length;
-  const cols = map[0].length;
+type FenceSet = Set<string>; // Stores fence positions as strings "x,y -> nx,ny"
 
-  const visited = new Set<string>();
-  const posKey = (x: number, y: number) => `${x},${y}`;
-
-  const directions = [
-      [-1, 0], // up
-      [1, 0],  // down
-      [0, -1], // left
-      [0, 1]   // right
-  ];
-
-  function floodFill(x: number, y: number): { area: number; borderCount: number; sideCount: number } {
-      const type = map[x][y];
+  
+  
+function calculateTotalFencePrice(grid: string[][]): { totalPrice: number; fences: FenceSet } {
+    const rows = grid.length;
+    const cols = grid[0].length;
+  
+    const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+    const directions = [
+      { dx: -1, dy: 0 }, // Up
+      { dx: 1, dy: 0 }, // Down
+      { dx: 0, dy: -1 }, // Left
+      { dx: 0, dy: 1 }, // Right
+    ];
+  
+    const isInBounds = (x: number, y: number): boolean => x >= 0 && x < rows && y >= 0 && y < cols;
+  
+    const fences: FenceSet = new Set();
+  
+    const addFence = (x1: number, y1: number, x2: number, y2: number) => {
+      const sortedFence = [
+        `${Math.min(x1, x2)},${Math.min(y1, y2)}`,
+        `${Math.max(x1, x2)},${Math.max(y1, y2)}`
+      ].join(' -> ');
+      fences.add(sortedFence);
+    };
+  
+    const floodFill = (start: Point): RegionInfo => {
+      const queue: Point[] = [start];
+      const regionType = grid[start.x][start.y];
       let area = 0;
-      let borderCount = 0;
-      let sideCount = 0;
-
-      const stack: [number, number][] = [[x, y]];
-      visited.add(posKey(x, y));
-
-      const edges: Set<string>[] = directions.map(() => new Set<string>());
-
-      while (stack.length > 0) {
-          const [cx, cy] = stack.pop()!;
-          area++;
-
-          for (let i = 0; i < directions.length; i++) {
-              const [dx, dy] = directions[i];
-              const nx = cx + dx;
-              const ny = cy + dy;
-
-              const sidePosKey = `${nx},${ny}`;
-              if (nx < 0 || nx >= rows || ny < 0 || ny >= cols || map[nx][ny] !== type) {
-                  borderCount++;
-                  edges[i].add(sidePosKey);
-              } else if (!visited.has(posKey(nx, ny))) {
-                  visited.add(posKey(nx, ny));
-                  stack.push([nx, ny]);
-              }
+      let sides = 0;
+  
+      while (queue.length > 0) {
+        const { x, y } = queue.pop()!;
+        if (visited[x][y]) continue;
+  
+        visited[x][y] = true;
+        area++;
+  
+        // Check all 4 directions
+        for (const { dx, dy } of directions) {
+          const nx = x + dx;
+          const ny = y + dy;
+  
+          if (!isInBounds(nx, ny) || grid[nx][ny] !== regionType) {
+            // Out of bounds or bordering a different region
+            sides++;
+            if (isInBounds(nx, ny)) {
+              addFence(x, y, nx, ny);
+            }
+          } else if (!visited[nx][ny]) {
+            queue.push({ x: nx, y: ny });
           }
+        }
       }
-
-      for (let i = 0; i < directions.length; i++) {
-          const toRemove = new Set<string>();
-          for (const xy of edges[i]) {
-              const [dx, dy] = directions[i];
-              let [nx, ny] = xy.split(",").map(Number);
-              nx += dx;
-              ny += dy;
-
-              while (edges[i].has(`${nx},${ny}`)) {
-                  toRemove.add(`${nx},${ny}`);
-                  nx += dx;
-                  ny += dy;
-              }
+  
+      return { area, sides };
+    };
+  
+    const regions = new Map<string, RegionInfo>();
+  
+    for (let x = 0; x < rows; x++) {
+      for (let y = 0; y < cols; y++) {
+        if (!visited[x][y]) {
+          const regionType = grid[x][y];
+          const { area, sides } = floodFill({ x, y });
+  
+          if (!regions.has(regionType)) {
+            regions.set(regionType, { area: 0, sides: 0 });
           }
-          console.log(edges)
-          sideCount += edges[i].size - toRemove.size;
+  
+          const info = regions.get(regionType)!;
+          info.area += area;
+          info.sides += sides;
+        }
       }
-
-      return { area, borderCount, sideCount };
+    }
+  
+    let totalPrice = 0;
+    for (const { area, sides } of regions.values()) {
+      totalPrice += area * sides;
+    }
+  
+    return { totalPrice, fences };
   }
-
-  let totalCost = 0;
-
-  for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-          if (!visited.has(posKey(i, j))) {
-              const { area, borderCount, sideCount } = floodFill(i, j);
-              const count = mode === 1 ? borderCount : sideCount;
-              totalCost += area * count;
-          }
-      }
-  }
-
-  return totalCost;
-}
 
 export const part1 = (input: string[]) => {
-  return calculateTotalFencingCost(input.map((row) => row.split("")),1);
+  //return calculateTotalFencePrice(input.map((row) => row.split("")));
 };
 
 export const part2 = (input: string[]) => {
-  return calculateTotalFencingCost(input.map((row) => row.split("")),2);
+    const grid = input.map((row) => row.split(""));
+  const {fences, totalPrice} = calculateTotalFencePrice(grid);
+
+  console.log(fences);
+    printGrid(grid,"",fences,() => "#")
+  return totalPrice;
 };
 
 const DAY = Number("12")
